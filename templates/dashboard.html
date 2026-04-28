@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load markdown_extras %}
+{% load recent_questions %}
+{% load static %}
+
+{% block content %}
+    <form class = 'search-bar' action="{% url 'dashboard' %}">
+        {{ search_form }}
+        <button style="color: white">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-search-icon lucide-search"><path d="m21 21-4.34-4.34"/><circle cx="11" cy="11" r="8"/></svg>
+        </button>
+    </form>
+
+    <div class="posts">
+        {% recent_questions 5 posts recent_posts %}
+        {% for post in recent_posts %}
+
+            <div class="post">
+                <a class="post-url" href="{% url 'detail-post' post.pk %}">
+                    <h2>{{ post.title }}</h2>
+                    <p>{{ post.context|markdown }}</p>
+                    <div class="post-meta">
+                        <span>Post by {{ post.author|default:'Anonymous' }} at {{ post.created_at }}</span>
+                    </div>
+                </a>
+                </div>
+        {% endfor %}
+
+
+        </div>
+{% endblock %}
