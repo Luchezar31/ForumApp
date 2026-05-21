@@ -12,8 +12,8 @@
     </form>
 
     <div class="posts">
-        {% recent_questions 5 posts recent_posts %}
-        {% for post in recent_posts %}
+{#        {% recent_questions 5 posts recent_posts %}#}
+        {% for post in posts %}
 
             <div class="post">
                 <a class="post-url" href="{% url 'detail-post' post.pk %}">
@@ -25,6 +25,23 @@
                 </a>
                 </div>
         {% endfor %}
+
+        <div class="pagination">
+             <span class="step-links">
+             {% if page_obj.has_previous %}
+                 <a href="?page=1&query={{ query }}">&laquo; first</a>
+                 <a href="?page={{ page_obj.previous_page_number }}&query={{ query }}">previous</a>
+             {% endif %}
+                 <span class="current">
+                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                </span>
+                 {% if page_obj.has_next %}
+                     <a href="?page={{ page_obj.next_page_number }}&query={{ query }}">next</a>
+                     <a href="?page={{ page_obj.paginator.num_pages }}&query={{ query }}">last &raquo;</a>
+                 {% endif %}
+             </span>
+        </div>
+
 
 
         </div>
