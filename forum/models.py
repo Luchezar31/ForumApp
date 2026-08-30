@@ -36,6 +36,15 @@ class PostBaseModel(models.Model):
     def __str__(self):
         return self.title
 
+    approved = models.BooleanField(
+        default=False,
+    )
+
+    class Meta:
+        permissions = [
+            ('can_approve_post','Can approve post base model')
+        ]
+
 class Comment(models.Model):
     post = ForeignKey(
         to=PostBaseModel,

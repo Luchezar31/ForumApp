@@ -14,10 +14,13 @@
     <div class="posts">
 {#        {% recent_questions 5 posts recent_posts %}#}
         {% for post in posts %}
-
             <div class="post">
                 <a class="post-url" href="{% url 'detail-post' post.pk %}">
-                    <h2>{{ post.title }}</h2>
+                    <h2>{{ post.title }}
+                        {% if perms.posts.can_approve_post and not post.approved %}
+                            <a href="{% url 'approve' post.pk %}" onclick="event.PreventDefault(); document.getElementById('approve-post')">&#x2611;</a>
+                        {% endif %}
+                    </h2>
                     <p>{{ post.context|markdown }}</p>
                     <div class="post-meta">
                         <span>Post by {{ post.author|default:'Anonymous' }} at {{ post.created_at }}</span>
@@ -46,3 +49,8 @@
 
         </div>
 {% endblock %}
+
+
+<form style="display:none" action="{% url 'approve' post.pk %}" id="approve-post" method="post">
+    {% csrf_token %}
+</form>

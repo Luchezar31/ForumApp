@@ -19,7 +19,7 @@ class TimeRestrictionMixin:
         current_time = datetime.now().time()
 
         restrict_start = time(8, 0)  # 8:00 PM
-        restrict_end = time(20, 0)
+        restrict_end = time(23, 59)
 
         if not restrict_start <= current_time <= restrict_end:
             return HttpResponseForbidden('The site does not work before 8 and after 20')

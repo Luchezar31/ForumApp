@@ -1,9 +1,10 @@
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.forms.models import modelform_factory, model_to_dict
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import UpdateView, ListView, CreateView, DeleteView, FormView, DetailView
+from django.views.generic import UpdateView, ListView, CreateView, DeleteView, DetailView
 from django.views.generic.edit import FormMixin
 
 from forum.forms import PostCreateForm, PostDeleteForm, SearchForm, CommentFormSet
@@ -18,21 +19,29 @@ class IndexView(View):
     def get(self,request,*args,**kwargs):
         return render(request,'index.html')
 
+def approve_view(request,pk):
+    post = PostBaseModel.objects.get(pk=pk)
+    post.approved=True
+    post.save()
 
+    return redirect('dashboard')
 
-class DashboardView(ListView):
+class DashboardView(ListView,PermissionRequiredMixin):
     template_name = 'dashboard.html'
     model = PostBaseModel
     context_object_name = 'posts'
-    paginate_by = 2
-
-
+    paginate_by = 5
+    permission_required = 'posts.can_approve_post'
 
     def get_queryset(self):
 
         queryset = super().get_queryset().order_by('-created_at')
 
         self.form = SearchForm(self.request.GET)
+
+        if not self.has_permission():
+            queryset = queryset.filter(approved=True)
+
 
         if self.form.is_valid():
             query = self.form.cleaned_data.get('query')
@@ -52,42 +61,11 @@ class DashboardView(ListView):
 
         return context
 
-# def dashboard(request):
-#     search_form = SearchForm(request.GET)
-#     posts = PostBaseModel.objects.all()
-#
-#     if request.method == "GET" and search_form.is_valid():
-#         query = search_form.cleaned_data.get('query')
-#         posts = posts.filter(
-#             title__icontains=query
-#         )
-#
-#     context={
-#         'posts':posts,
-#         'search_form':search_form
-#     }
-#
-#     return render(request, 'dashboard.html',context)
 
-
-class PostCreateView(TimeRestrictionMixin, CreateView):
+class PostCreateView(LoginRequiredMixin,TimeRestrictionMixin, CreateView):
     form_class = PostCreateForm
     template_name = 'create-post.html'
     success_url = reverse_lazy('dashboard')
-
-#
-# def post_create_view(request):
-#     form = PostCreateForm(request.POST or None,request.FILES or None)
-#
-#     if request.method == 'POST' and form.is_valid():
-#         form.save()
-#         return redirect('dashboard')
-#
-#     context = {
-#         'form': form
-#     }
-#
-#     return render(request,'create-post.html',context)
 
 
 class EditPostView(UpdateView):
@@ -101,25 +79,6 @@ class EditPostView(UpdateView):
         return modelform_factory(PostBaseModel,fields=('context',))
 
 
-# def post_edit_form(request,pk):
-#     post = PostBaseModel.objects.get(pk=pk)
-#
-#     if request.user.is_superuser:
-#         PostEditForm = modelform_factory(PostBaseModel, fields='__all__')
-#     else:
-#         PostEditForm = modelform_factory(PostBaseModel, fields=('context',))
-#
-#     form = PostEditForm(request.POST or None, instance=post )
-#
-#     if request.method == 'POST' and form.is_valid():
-#         form.save()
-#         return redirect('dashboard')
-#
-#     context = {
-#         'form':form
-#     }
-#
-#     return render(request,'edit-post.html',context)
 
 class PostDetailView(DetailView, FormMixin):
     template_name = 'post-details.html'
@@ -152,30 +111,6 @@ class PostDetailView(DetailView, FormMixin):
         return HttpResponseRedirect(self.get_success_url())
 
 
-
-
-# def post_details_view(request, pk):
-#     post = PostBaseModel.objects.get(pk=pk)
-#
-#
-#     formset = CommentFormSet(request.POST or None)
-#
-#     if request.method=="POST" and formset.is_valid():
-#         for form in formset:
-#             comment = form.save(commit=False)
-#             comment.author = request.user.username
-#             comment.post = post
-#             comment.save()
-#         return redirect('detail-post',pk=post.pk)
-#
-#     context={
-#         'post':post,
-#         'formset':formset
-#     }
-#
-#     return render(request,'post-details.html',context)
-
-
 class DeletePostView(DeleteView):
     form_class = PostDeleteForm
     model = PostBaseModel
@@ -194,20 +129,6 @@ class DeletePostView(DeleteView):
         if self.request.method == 'POST':
             kwargs['data'] = self.get_initial()
         return kwargs
-
-# def post_delete_view(request,pk):
-#     post = PostBaseModel.objects.get(pk=pk)
-#     form = PostDeleteForm(instance=post)
-#
-#     if request.method == 'POST':
-#         post.delete()
-#         return redirect('dashboard')
-#
-#     context={
-#         'form':form
-#     }
-#
-#     return render(request,'delete-post.html',context)
 
 
 
