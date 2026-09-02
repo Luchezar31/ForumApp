@@ -1,7 +1,7 @@
 from django.contrib import admin
+from django.contrib.auth import get_user_model
 
-from accounts.models import CustomUser
-
+CustomUser = get_user_model()
 
 @admin.register(CustomUser)
 class UserAdmin(admin.ModelAdmin):
