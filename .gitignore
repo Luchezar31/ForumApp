@@ -1,0 +1,21 @@
+# Виртуална среда
+venv/
+env/
+.venv/
+
+
+*.sqlite3
+
+
+__pycache__/
+*.py[cod]
+
+
+/static/
+/media_files/
+
+# Тайни и настройки
+.env
+local_settings.py
+
+.idea/
