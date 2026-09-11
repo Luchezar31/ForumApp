@@ -5,7 +5,7 @@ from django.db.models import OneToOneField
 
 from accounts.managers import AppUserManager
 
-from accounts.managers import CustomUserManager
+from accounts.managers import AppUserManager
 
 # class CustomUser(AbstractUser):
 #     points = models.IntegerField(
