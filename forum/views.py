@@ -4,7 +4,7 @@ from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import UpdateView, ListView, CreateView, DeleteView, DetailView
+from django.views.generic import TemplateView, UpdateView, ListView, CreateView, DeleteView, DetailView
 from django.views.generic.edit import FormMixin
 
 from forum.forms import PostCreateForm, PostDeleteForm, SearchForm, CommentFormSet
@@ -14,10 +14,13 @@ from forum.models import PostBaseModel
 def index(request):
     return render(request,'index.html')
 
-class IndexView(View):
+class IndexView(TemplateView):
+    template_name='index.html'
+    
+    def get_context_data(self, **kwargs):
+        self.request.session['counter'] = self.request.session.get('counter',0) + 1
+        return super().get_context_data(**kwargs)
 
-    def get(self,request,*args,**kwargs):
-        return render(request,'index.html')
 
 def approve_view(request,pk):
     post = PostBaseModel.objects.get(pk=pk)

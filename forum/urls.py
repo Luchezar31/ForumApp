@@ -4,7 +4,8 @@ from django.urls import path, include
 from forum import views
 
 urlpatterns = [
-    path('',views.DashboardView.as_view(),name='dashboard'),
+    path('',views.IndexView.as_view(),name='index'),
+    path('dashboard/',views.DashboardView.as_view(),name='dashboard'),
     path('post/',include([
         path('add/',views.PostCreateView.as_view(),name='add-post'),
         path('approve/<int:pk>',views.approve_view,name='approve'),
