@@ -1,8 +1,10 @@
 from django.db import models
 from django.db.models import ForeignKey
-
+from django.contrib.auth import get_user_model
 from forum.choices import LanguageChoices
 
+
+UserModel = get_user_model()
 
 class PostBaseModel(models.Model):
     title = models.CharField(
@@ -11,8 +13,9 @@ class PostBaseModel(models.Model):
 
     context = models.TextField()
 
-    author = models.CharField(
-        max_length=30
+    author = models.ForeignKey(
+        to=UserModel,
+        on_delete=models.CASCADE
     )
 
     created_at = models.DateTimeField(

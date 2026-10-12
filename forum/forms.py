@@ -31,28 +31,17 @@ class PostBaseForm(forms.ModelForm):
 
         return cleaned_data
 
-    def clean_author(self):
-        author = self.cleaned_data.get('author')
 
-        if not author.isalpha():
-            raise ValidationError('The name must contains only letters!')
-
-        return author
-
-    def save(self, commit=True):
-        post = super().save(commit=False)
-
-        post.author = post.author.capitalize()
-
-        if commit:
-            post.save()
-
-        return post
+    
 
 
 
 
 class PostCreateForm(PostBaseForm):
+
+    class Meta(PostBaseForm.Meta):
+        exclude = ('author','approved')
+
     def __init__(self,*args,**kwargs):
         super().__init__(*args,**kwargs)
         self.helper = FormHelper()
