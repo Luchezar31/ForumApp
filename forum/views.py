@@ -1,3 +1,6 @@
+import asyncio
+from urllib import request
+
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.forms.models import modelform_factory, model_to_dict
 from django.http import HttpResponseRedirect
@@ -6,13 +9,38 @@ from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import TemplateView, UpdateView, ListView, CreateView, DeleteView, DetailView
 from django.views.generic.edit import FormMixin
-
+from asgiref.sync import sync_to_async
 from forum.forms import PostCreateForm, PostDeleteForm, SearchForm, CommentFormSet
 from forum.mixins import TimeRestrictionMixin
 from forum.models import PostBaseModel
+from django.contrib.auth import get_user_model
+from forum.signals import _send_email_on_approve
+
 
 def index(request):
     return render(request,'index.html')
+
+
+UserModel = get_user_model
+
+
+
+async def notify_all_users():
+   
+    users = await sync_to_async(list)(UserModel.objects.all())
+    email_tasks = [
+         sync_to_async(_send_email_on_approve)(
+                subject='Maintaince',
+                message='Currently under maintince',
+                from_email = 'noretply@froumapp.com',
+                recipient_list=[user.email]
+            ) for user in users
+    ]
+    await asyncio.gather(*email_tasks)
+
+
+
+
 
 class IndexView(TemplateView):
     template_name='index.html'
