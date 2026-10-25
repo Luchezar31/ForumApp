@@ -1,12 +1,9 @@
 import asyncio
-from urllib import request
-
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.forms.models import modelform_factory, model_to_dict
 from django.http import HttpResponseRedirect
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from django.views import View
 from django.views.generic import TemplateView, UpdateView, ListView, CreateView, DeleteView, DetailView
 from django.views.generic.edit import FormMixin
 from asgiref.sync import sync_to_async
@@ -21,17 +18,17 @@ def index(request):
     return render(request,'index.html')
 
 
-UserModel = get_user_model
+UserModel = get_user_model()
 
 
 
-async def notify_all_users():
+async def notify_all_users(request):
    
     users = await sync_to_async(list)(UserModel.objects.all())
     email_tasks = [
-         sync_to_async(_send_email_on_approve)(
-                subject='Maintaince',
-                message='Currently under maintince',
+         _send_email_on_approve(
+                subject='Maintenance',
+                message='Currently under maintenance',
                 from_email = 'noretply@froumapp.com',
                 recipient_list=[user.email]
             ) for user in users
